@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Royal - Slots, Black Jack & Poker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Globale Stile */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a2e38 0%, #1c4a5f 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Stile */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #f8d347;
+            text-shadow: 0 0 15px rgba(248, 211, 71, 0.7);
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Hauptinhalt */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Spielauswahl */
+        .game-selection {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .game-card {
+            width: 280px;
+            height: 350px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .game-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .game-card:hover .game-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .game-card-front, .game-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-card-front {
+            background: linear-gradient(145deg, #2b5876, #4e4376);
+            border: 2px solid #f8d347;
+        }
+
+        .game-card-back {
+            background: linear-gradient(145deg, #4e4376, #2b5876);
+            transform: rotateY(180deg);
+            border: 2px solid #f8d347;
+            justify-content: space-around;
+        }
+
+        .game-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: #f8d347;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .game-description {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .play-btn {
+            background: #f8d347;
+            color: #0a2e38;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .play-btn:hover {
+            background: #ffdf6b;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Animationen */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #f8d347; }
+            50% { text-shadow: 0 0 20px #f8d347; }
+            100% { text-shadow: 0 0 5px #f8d347; }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .glowing {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        /* Chip-Animation */
+        .chips-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .chip {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f8d347, #d4af37);
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .logo {
+                font-size: 2.2rem;
+            }
+
+            .game-card {
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="chips-container">
+    <div class="chip" style="top: 10%; left: 10%;"></div>
+    <div class="chip" style="top: 20%; left: 80%;"></div>
+    <div class="chip" style="top: 70%; left: 15%;"></div>
+    <div class="chip" style="top: 60%; left: 85%;"></div>
+    <div class="chip" style="top: 40%; left: 5%;"></div>
+    <div class="chip" style="top: 30%; left: 90%;"></div>
+    <div class="chip" style="top: 80%; left: 75%;"></div>
+</div>
+
+<div class="container">
+    <header>
+        <div class="logo">
+            <i class="fas fa-club"></i>
+            <span>Casino Royal</span>
+            <i class="fas fa-spade"></i>
+        </div>
+        <p>Wählen Sie ein Spiel und versuchen Sie Ihr Glück!</p>
+    </header>
+
+    <div class="main-content">
+        <div class="game-selection">
+            <div class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-card-front">
+                        <i class="game-icon fas fa-sliders-h"></i>
+                        <h2 class="game-title">Slots</h2>
+                        <p class="game-description">Drehen Sie an den Walzen und gewinnen Sie mit gleichen Symbolen.</p>
+                    </div>
+                    <div class="game-card-back">
+                        <h2 class="game-title">Slots</h2>
+                        <p class="game-description">Drehen Sie an den Walzen und gewinnen Sie, wenn drei gleiche Symbole in einer Reihe erscheinen.</p>
+                        <button class="play-btn" onclick="window.location.href='slots.html'">Spielen</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-card-front">
+                        <i class="game-icon fas fa-cards"></i>
+                        <h2 class="game-title">Black Jack</h2>
+                        <p class="game-description">Versuchen Sie, 21 Punkte zu erreichen oder näher dran zu sein als der Dealer.</p>
+                    </div>
+                    <div class="game-card-back">
+                        <h2 class="game-title">Black Jack</h2>
+                        <p class="game-description">Ziel ist es, mit deinen Karten näher an 21 Punkte zu kommen als der Dealer, ohne zu überziehen.</p>
+                        <button class="play-btn" onclick="window.location.href='blackjack.html'">Spielen</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="game-card-inner">
+                    <div class="game-card-front">
+                        <i class="game-icon fas fa-diamond"></i>
+                        <h2 class="game-title">Poker</h2>
+                        <p class="game-description">Spielen Sie Texas Hold'em Poker gegen virtuelle Gegner.</p>
+                    </div>
+                    <div class="game-card-back">
+                        <h2 class="game-title">Poker</h2>
+                        <p class="game-description">Erstelle die beste Fünf-Karten-Kombination und setze clever, um das Spiel zu gewinnen.</p>
+                        <button class="play-btn" onclick="window.location.href='poker.html'">Spielen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2023 Casino Royal | Nur zum Spaß - Kein echtes Geld</p>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animationen hinzufügen
+        const gameIcons = document.querySelectorAll('.game-icon');
+        gameIcons.forEach(icon => {
+            icon.classList.add('floating');
+        });
+
+        const logo = document.querySelector('.logo');
+        logo.classList.add('glowing');
+
+        // Chips animieren
+        const chips = document.querySelectorAll('.chip');
+        chips.forEach((chip, index) => {
+            // Unterschiedliche Animationen für Chips
+            chip.style.animation = `float ${3 + index % 2}s ease-in-out infinite`;
+            chip.style.animationDelay = `${index * 0.3}s`;
+        });
+    });
+</script>
+</body>
+</html>

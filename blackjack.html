@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Royal - Black Jack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Globale Stile */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a2e38 0%, #1c4a5f 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Stile */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f8d347;
+            text-shadow: 0 0 10px rgba(248, 211, 71, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #f8d347;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(248, 211, 71, 0.2);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* Spielbereich */
+        .game-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.05"><rect fill="white" width="100" height="100"/></svg>');
+            z-index: -1;
+        }
+
+        /* Kartenstile */
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+            min-height: 200px;
+        }
+
+        .card {
+            width: 120px;
+            height: 170px;
+            background: #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .card.red {
+            color: #d32f2f;
+        }
+
+        .card.black {
+            color: #263238;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .card-suit {
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .card-corner {
+            font-size: 1.2rem;
+        }
+
+        .card-corner.top {
+            align-self: flex-start;
+        }
+
+        .card-corner.bottom {
+            align-self: flex-end;
+            transform: rotate(180deg);
+        }
+
+        /* Spielsteuerung */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .control-btn {
+            background: #f8d347;
+            color: #0a2e38;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #ffdf6b;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Spielerinfo */
+        .player-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .score {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+
+        /* Ergebnis-Anzeige */
+        .result {
+            text-align: center;
+            font-size: 1.8rem;
+            margin: 20px 0;
+            color: #f8d347;
+            font-weight: bold;
+            height: 50px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+        }
+
+        /* Animationen */
+        @keyframes dealCard {
+            0% { transform: translateY(-100px) rotate(10deg); opacity: 0; }
+            100% { transform: translateY(0) rotate(0); opacity: 1; }
+        }
+
+        @keyframes chipGlow {
+            0% { box-shadow: 0 0 5px #f8d347; }
+            50% { box-shadow: 0 0 20px #f8d347; }
+            100% { box-shadow: 0 0 5px #f8d347; }
+        }
+
+        .deal-animation {
+            animation: dealCard 0.5s ease forwards;
+        }
+
+        .chip {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f8d347, #d4af37);
+            position: absolute;
+            animation: chipGlow 2s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .back-btn {
+                position: relative;
+                margin-bottom: 15px;
+                transform: none;
+                display: inline-flex;
+                top: 0;
+            }
+
+            .back-btn:hover {
+                transform: scale(1.05);
+            }
+
+            .card {
+                width: 80px;
+                height: 120px;
+            }
+
+            .card-value {
+                font-size: 1.4rem;
+            }
+
+            .card-suit {
+                font-size: 1.6rem;
+            }
+
+            .game-controls {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Zurück
+        </a>
+        <div class="logo">
+            <i class="fas fa-cards"></i>
+            <span>Black Jack</span>
+        </div>
+        <p>Versuchen Sie, 21 Punkte zu erreichen oder näher dran zu sein als der Dealer</p>
+    </header>
+
+    <div class="game-area">
+        <div class="chips-container">
+            <div class="chip" style="top: 20px; left: 50px;"></div>
+            <div class="chip" style="top: 40px; left: 70px;"></div>
+            <div class="chip" style="top: 30px; right: 60px;"></div>
+        </div>
+
+        <h2 class="dealer-title">Dealer</h2>
+        <div class="cards-container" id="dealer-cards">
+            <!-- Dealer Karten werden hier eingefügt -->
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <h2 class="player-title">Spieler</h2>
+        <div class="cards-container" id="player-cards">
+            <!-- Spieler Karten werden hier eingefügt -->
+        </div>
+
+        <div class="player-info">
+            <div class="score">Dealer: <span id="dealer-score">0</span></div>
+            <div class="score">Spieler: <span id="player-score">0</span></div>
+        </div>
+
+        <div class="game-controls">
+            <button class="control-btn" id="hit-btn">Karte</button>
+            <button class="control-btn" id="stand-btn">Stand</button>
+            <button class="control-btn" id="deal-btn">Neues Spiel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Spielelemente
+        const resultDisplay = document.getElementById('result');
+        const dealerCards = document.getElementById('dealer-cards');
+        const playerCards = document.getElementById('player-cards');
+        const dealerScore = document.getElementById('dealer-score');
+        const playerScore = document.getElementById('player-score');
+        const hitBtn = document.getElementById('hit-btn');
+        const standBtn = document.getElementById('stand-btn');
+        const dealBtn = document.getElementById('deal-btn');
+
+        // Spielvariablen
+        let deck = [];
+        let dealerHand = [];
+        let playerHand = [];
+        let gameOver = false;
+
+        // Kartensymbol-Mapping
+        const suits = {
+            'hearts': '♥',
+            'diamonds': '♦',
+            'clubs': '♣',
+            'spades': '♠'
+        };
+
+        // Event-Listener für Spielsteuerung
+        hitBtn.addEventListener('click', playerHit);
+        standBtn.addEventListener('click', playerStand);
+        dealBtn.addEventListener('click', resetGame);
+
+        // Kartendeck erstellen
+        function createDeck() {
+            deck = [];
+            const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            const suitsList = ['hearts', 'diamonds', 'clubs', 'spades'];
+
+            for (let suit of suitsList) {
+                for (let value of values) {
+                    deck.push({ value, suit });
+                }
+            }
+
+            // Deck mischen
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        // Karte ziehen
+        function drawCard() {
+            return deck.pop();
+        }
+
+        // Kartenwert berechnen (für Blackjack)
+        function calculateHandValue(hand) {
+            let value = 0;
+            let aces = 0;
+
+            for (let card of hand) {
+                if (card.value === 'A') {
+                    aces += 1;
+                    value += 11;
+                } else if (['K', 'Q', 'J'].includes(card.value)) {
+                    value += 10;
+                } else {
+                    value += parseInt(card.value);
+                }
+            }
+
+            // Asse anpassen, wenn Wert über 21
+            while (value > 21 && aces > 0) {
+                value -= 10;
+                aces -= 1;
+            }
+
+            return value;
+        }
+
+        // Karte als DOM-Element darstellen
+        function createCardElement(card, isDealer = false, hidden = false) {
+            const cardEl = document.createElement('div');
+            const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
+
+            cardEl.className = `card ${isRed ? 'red' : 'black'}`;
+
+            if (hidden) {
+                cardEl.innerHTML = `
+                        <div class="card-value">?</div>
+                        <div class="card-suit">?</div>
+                    `;
+                cardEl.style.background = 'linear-gradient(135deg, #3a7bd5, #00d2ff)';
+            } else {
+                cardEl.innerHTML = `
+                        <div class="card-corner top">${card.value}<br>${suits[card.suit]}</div>
+                        <div class="card-value">${suits[card.suit]}</div>
+                        <div class="card-corner bottom">${card.value}<br>${suits[card.suit]}</div>
+                    `;
+            }
+
+            cardEl.style.opacity = '0';
+            setTimeout(() => {
+                cardEl.classList.add('deal-animation');
+            }, 100);
+
+            return cardEl;
+        }
+
+        // Spiel zurücksetzen
+        function resetGame() {
+            dealerCards.innerHTML = '';
+            playerCards.innerHTML = '';
+            resultDisplay.textContent = '';
+            resultDisplay.classList.remove('show');
+
+            hitBtn.disabled = false;
+            standBtn.disabled = false;
+
+            createDeck();
+            dealerHand = [];
+            playerHand = [];
+            gameOver = false;
+
+            // Erste Karten austeilen
+            playerHand.push(drawCard());
+            dealerHand.push(drawCard());
+            playerHand.push(drawCard());
+            dealerHand.push(drawCard());
+
+            // Karten anzeigen
+            updateDisplay();
+
+            // Prüfen auf Blackjack
+            const playerValue = calculateHandValue(playerHand);
+            if (playerValue === 21) {
+                playerStand();
+            }
+        }
+
+        // Spielstand anzeigen
+        function updateDisplay() {
+            dealerCards.innerHTML = '';
+            playerCards.innerHTML = '';
+
+            // Dealer-Karten anzeigen
+            for (let i = 0; i < dealerHand.length; i++) {
+                const card = dealerHand[i];
+                const hidden = (i === 0 && !gameOver);
+                const cardEl = createCardElement(card, true, hidden);
+                dealerCards.appendChild(cardEl);
+            }
+
+            // Spieler-Karten anzeigen
+            for (let card of playerHand) {
+                const cardEl = createCardElement(card);
+                playerCards.appendChild(cardEl);
+            }
+
+            // Punkte anzeigen
+            dealerScore.textContent = gameOver ? calculateHandValue(dealerHand) : '?';
+            playerScore.textContent = calculateHandValue(playerHand);
+        }
+
+        // Spieler zieht Karte
+        function playerHit() {
+            if (gameOver) return;
+
+            playerHand.push(drawCard());
+            updateDisplay();
+
+            const playerValue = calculateHandValue(playerHand);
+
+            if (playerValue > 21) {
+                endGame('Dealer gewinnt! Sie haben überkauft.');
+            }
+        }
+
+        // Spieler bleibt stehen
+        function playerStand() {
+            if (gameOver) return;
+            gameOver = true;
+
+            hitBtn.disabled = true;
+            standBtn.disabled = true;
+
+            // Dealer zieht Karten bis mindestens 17
+            while (calculateHandValue(dealerHand) < 17) {
+                dealerHand.push(drawCard());
+            }
+
+            updateDisplay();
+
+            const dealerValue = calculateHandValue(dealerHand);
+            const playerValue = calculateHandValue(playerHand);
+
+            // Ergebnis bestimmen
+            if (dealerValue > 21) {
+                endGame('Sie gewinnen! Dealer hat überkauft.');
+            } else if (dealerValue > playerValue) {
+                endGame('Dealer gewinnt!');
+            } else if (playerValue > dealerValue) {
+                endGame('Sie gewinnen!');
+            } else {
+                endGame('Unentschieden!');
+            }
+        }
+
+        // Spiel beenden
+        function endGame(message) {
+            gameOver = true;
+            resultDisplay.textContent = message;
+            resultDisplay.classList.add('show');
+        }
+
+        // Spiel initialisieren
+        resetGame();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Royal - Slots</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Globale Stile */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4a1c6d 0%, #6b2c9e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Stile */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f8d347;
+            text-shadow: 0 0 10px rgba(248, 211, 71, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #f8d347;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(248, 211, 71, 0.2);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* Spielbereich */
+        .game-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.05"><rect fill="white" width="100" height="100"/></svg>');
+            z-index: -1;
+        }
+
+        /* Slot-Machine Design */
+        .slot-machine {
+            background: linear-gradient(145deg, #c56cf0, #6c5ce7);
+            border: 10px solid #ffaf40;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .slot-machine::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border: 5px solid #f8d347;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        /* Walzen */
+        .reels {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .reel {
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            border: 3px solid #2c3e50;
+        }
+
+        .reel-content {
+            position: absolute;
+            width: 100%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+
+        .symbol {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+        }
+
+        /* Spezielle Stile für die 7er */
+        .symbol.seven {
+            color: #ff0000;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            font-family: Arial, sans-serif; /* Bessere Darstellung für Zahlen */
+        }
+
+        /* Gewinnlinien */
+        .paylines {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .payline {
+            width: 80%;
+            height: 5px;
+            background: #f8d347;
+            position: absolute;
+            left: 10%;
+            box-shadow: 0 0 10px #f8d347;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .payline.middle {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .payline.top {
+            top: 25%;
+        }
+
+        .payline.bottom {
+            top: 75%;
+        }
+
+        .payline.diagonal1 {
+            width: 90%;
+            transform: rotate(45deg);
+            top: 50%;
+            left: 5%;
+        }
+
+        .payline.diagonal2 {
+            width: 90%;
+            transform: rotate(-45deg);
+            top: 50%;
+            left: 5%;
+        }
+
+        /* Spielsteuerung */
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .spin-btn {
+            background: #f8d347;
+            color: #4a1c6d;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .spin-btn:hover {
+            background: #ffdf6b;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .spin-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Bet-Steuerung */
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .bet-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #f8d347;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bet-btn:hover {
+            background: rgba(248, 211, 71, 0.2);
+            transform: scale(1.1);
+        }
+
+        .bet-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f8d347;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Spielerinfo */
+        .player-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+
+        .chips {
+            color: #f8d347;
+            font-weight: bold;
+        }
+
+        /* Ergebnis-Anzeige */
+        .result {
+            text-align: center;
+            font-size: 1.8rem;
+            margin: 20px 0;
+            color: #f8d347;
+            font-weight: bold;
+            height: 50px;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Animationen */
+        @keyframes winFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes reelSpin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-200px); }
+        }
+
+        .win-flash {
+            animation: winFlash 0.5s ease infinite;
+        }
+
+        .spinning {
+            animation: reelSpin 0.2s linear infinite;
+        }
+
+        /* Jackpot-Anzeige */
+        .jackpot {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: #f8d347;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .back-btn {
+                position: relative;
+                margin-bottom: 15px;
+                transform: none;
+                display: inline-flex;
+                top: 0;
+            }
+
+            .back-btn:hover {
+                transform: scale(1.05);
+            }
+
+            .reel {
+                width: 80px;
+                height: 80px;
+            }
+
+            .symbol {
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .spin-btn {
+                padding: 12px 40px;
+                font-size: 1.2rem;
+            }
+
+            .player-info {
+                flex-direction: column;
+                gap: 15px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Zurück
+        </a>
+        <div class="logo">
+            <i class="fas fa-sliders-h"></i>
+            <span>Slot Machine</span>
+        </div>
+        <p>Drehen Sie an den Walzen und gewinnen Sie mit gleichen Symbolen</p>
+    </header>
+
+    <div class="game-area">
+        <div class="jackpot">Jackpot: <span id="jackpot-amount">5004</span> Chips</div>
+
+        <div class="slot-machine">
+            <div class="paylines">
+                <div class="payline middle" id="payline-middle"></div>
+                <div class="payline top" id="payline-top"></div>
+                <div class="payline bottom" id="payline-bottom"></div>
+                <div class="payline diagonal1" id="payline-diagonal1"></div>
+                <div class="payline diagonal2" id="payline-diagonal2"></div>
+            </div>
+
+            <div class="reels">
+                <div class="reel" id="reel1">
+                    <div class="reel-content" id="reel-content1">
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍊</div>
+                        <div class="symbol">💎</div>
+                        <div class="symbol">🍇</div>
+                        <div class="symbol">🔔</div>
+                        <div class="symbol seven">7</div>
+                    </div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="reel-content" id="reel-content2">
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍊</div>
+                        <div class="symbol">💎</div>
+                        <div class="symbol">🍇</div>
+                        <div class="symbol">🔔</div>
+                        <div class="symbol seven">7</div>
+                    </div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="reel-content" id="reel-content3">
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍊</div>
+                        <div class="symbol">💎</div>
+                        <div class="symbol">🍇</div>
+                        <div class="symbol">🔔</div>
+                        <div class="symbol seven">7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result" id="result">Gewonnen: 50 Chips!</div>
+
+        <div class="game-controls">
+            <div class="bet-controls">
+                <button class="bet-btn" id="bet-down">-</button>
+                <div class="bet-amount" id="bet-amount">10</div>
+                <button class="bet-btn" id="bet-up">+</button>
+            </div>
+
+            <button class="spin-btn" id="spin-btn">SPIN</button>
+        </div>
+
+        <div class="player-info">
+            <div class="info-box">
+                <span>Deine Chips</span>
+                <span class="chips" id="player-chips">1210</span>
+            </div>
+            <div class="info-box">
+                <span>Letzter Gewinn</span>
+                <span class="chips" id="last-win">50</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Spielelemente
+        const resultDisplay = document.getElementById('result');
+        const spinBtn = document.getElementById('spin-btn');
+        const betDownBtn = document.getElementById('bet-down');
+        const betUpBtn = document.getElementById('bet-up');
+        const betAmountDisplay = document.getElementById('bet-amount');
+        const playerChipsDisplay = document.getElementById('player-chips');
+        const lastWinDisplay = document.getElementById('last-win');
+        const jackpotAmountDisplay = document.getElementById('jackpot-amount');
+        const reelContents = [
+            document.getElementById('reel-content1'),
+            document.getElementById('reel-content2'),
+            document.getElementById('reel-content3')
+        ];
+
+        // Paylines
+        const paylines = [
+            document.getElementById('payline-middle'),
+            document.getElementById('payline-top'),
+            document.getElementById('payline-bottom'),
+            document.getElementById('payline-diagonal1'),
+            document.getElementById('payline-diagonal2')
+        ];
+
+        // Spielvariablen
+        let playerChips = 1210;
+        let currentBet = 10;
+        let isSpinning = false;
+        let jackpot = 5004;
+
+        // Symbol-Werte
+        const symbols = ['🍒', '🍋', '🍊', '💎', '🍇', '🔔', '7'];
+        const symbolValues = {
+            '🍒': 10,
+            '🍋': 20,
+            '🍊': 30,
+            '🍇': 40,
+            '🔔': 50,
+            '💎': 100,
+            '7': 200
+        };
+
+        // Event-Listener
+        spinBtn.addEventListener('click', startSpin);
+        betDownBtn.addEventListener('click', decreaseBet);
+        betUpBtn.addEventListener('click', increaseBet);
+
+        // Einsatz verringern
+        function decreaseBet() {
+            if (isSpinning) return;
+
+            if (currentBet > 10) {
+                currentBet -= 10;
+                updateBetDisplay();
+            }
+        }
+
+        // Einsatz erhöhen
+        function increaseBet() {
+            if (isSpinning) return;
+
+            if (currentBet < 100) {
+                currentBet += 10;
+                updateBetDisplay();
+            }
+        }
+
+        // Einsatz-Anzeige aktualisieren
+        function updateBetDisplay() {
+            betAmountDisplay.textContent = currentBet;
+        }
+
+        // Spiel starten
+        function startSpin() {
+            if (isSpinning) return;
+
+            // Prüfen, ob genug Chips vorhanden sind
+            if (playerChips < currentBet) {
+                resultDisplay.textContent = "Nicht genug Chips!";
+                return;
+            }
+
+            // Chips abziehen
+            playerChips -= currentBet;
+            playerChipsDisplay.textContent = playerChips;
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            resultDisplay.textContent = "Spinning...";
+
+            // Alle Paylines ausblenden
+            paylines.forEach(line => line.style.opacity = '0');
+
+            // Walzen drehen
+            spinReels();
+        }
+
+        // Walzen drehen
+        function spinReels() {
+            // Zufällige Positionen für jede Walze
+            const positions = [
+                Math.floor(Math.random() * 7),
+                Math.floor(Math.random() * 7),
+                Math.floor(Math.random() * 7)
+            ];
+
+            // Animation für jede Walze
+            for (let i = 0; i < 3; i++) {
+                reelContents[i].style.transition = 'transform 2s cubic-bezier(0.16, 1, 0.3, 1)';
+                reelContents[i].style.transform = `translateY(-${positions[i] * 100}px)`;
+
+                // Spinning-Klasse für Animation hinzufügen
+                reelContents[i].classList.add('spinning');
+
+                // Spinning-Animation nach kurzer Zeit entfernen
+                setTimeout(() => {
+                    reelContents[i].classList.remove('spinning');
+                }, 1900);
+            }
+
+            // Ergebnis nach Abschluss der Animation auswerten
+            setTimeout(() => {
+                evaluateResult(positions);
+            }, 2000);
+        }
+
+        // Ergebnis auswerten
+        function evaluateResult(positions) {
+            // Symbole an den angehaltenen Positionen
+            const resultSymbols = [
+                symbols[positions[0]],
+                symbols[positions[1]],
+                symbols[positions[2]]
+            ];
+
+            // Gewinnprüfung
+            let winAmount = 0;
+            let winningLine = -1;
+
+            // Mittlere Linie (alle drei gleich)
+            if (resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
+                winAmount = symbolValues[resultSymbols[0]] * currentBet;
+                winningLine = 0;
+            }
+            // Obere Linie (erste zwei gleich)
+            else if (resultSymbols[0] === resultSymbols[1]) {
+                winAmount = symbolValues[resultSymbols[0]] * currentBet / 2;
+                winningLine = 1;
+            }
+            // Untere Linie (letzte zwei gleich)
+            else if (resultSymbols[1] === resultSymbols[2]) {
+                winAmount = symbolValues[resultSymbols[1]] * currentBet / 2;
+                winningLine = 2;
+            }
+            // Diagonale von links oben nach rechts unten (erste und letzte gleich)
+            else if (resultSymbols[0] === resultSymbols[2]) {
+                winAmount = symbolValues[resultSymbols[0]] * currentBet / 2;
+                winningLine = 3;
+            }
+
+            // Jackpot bei drei 7ern
+            if (resultSymbols[0] === '7' && resultSymbols[1] === '7' && resultSymbols[2] === '7') {
+                winAmount = jackpot;
+                jackpot = 5000; // Jackpot zurücksetzen
+                resultDisplay.textContent = `JACKPOT! ${winAmount} Chips gewonnen!`;
+            }
+            // Gewinn anzeigen
+            else if (winAmount > 0) {
+                resultDisplay.textContent = `Gewonnen: ${winAmount} Chips!`;
+
+                // Gewinnlinie anzeigen
+                if (winningLine >= 0) {
+                    paylines[winningLine].style.opacity = '1';
+                }
+            } else {
+                resultDisplay.textContent = "Kein Gewinn. Versuchen Sie es erneut!";
+            }
+
+            // Chips gutschreiben
+            playerChips += winAmount;
+            playerChipsDisplay.textContent = playerChips;
+
+            // Letzten Gewinn anzeigen
+            if (winAmount > 0) {
+                lastWinDisplay.textContent = winAmount;
+            }
+
+            // Jackpot aktualisieren
+            jackpot += Math.floor(currentBet * 0.1);
+            jackpotAmountDisplay.textContent = jackpot;
+
+            // Spiel zurücksetzen
+            isSpinning = false;
+            spinBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
