@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTL St. Pölten Clicker Tycoon</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #0066b3; /* HTL Blau */
+        }
+
+        .logo {
+            width: 300px;
+            height: 300px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin: 20px auto;
+            display: block;
+            background-color: #0066b3;
+            border-radius: 50%;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        .logo:active {
+            transform: scale(0.95);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+
+        .shop {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .upgrade {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .upgrade:hover {
+            background-color: #e9e9e9;
+        }
+
+        .upgrade h3 {
+            margin-top: 0;
+            color: #0066b3;
+        }
+
+        .upgrade p {
+            margin: 5px 0;
+        }
+
+        button {
+            background-color: #0066b3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004d84;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .achievement {
+            background-color: #ffd700;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>HTL St. Pölten Clicker Tycoon</h1>
+
+    <div class="stats">
+        <div>Klicks: <span id="clicks">0</span></div>
+        <div>Pro Klick: <span id="click-value">1</span></div>
+        <div>Pro Sekunde: <span id="passive-income">0</span></div>
+    </div>
+
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeG5O7i4BJr2SaKWa3m8EsOPyUqi7ZLTaTJw&s" alt="HTL St. Pölten Logo" class="logo" id="logo">
+
+    <div class="shop">
+        <div class="upgrade">
+            <h3>Bessere Ausbildung</h3>
+            <p>Erhöht Klickwert um 1</p>
+            <p>Kosten: <span id="upgrade1-cost">10</span> Klicks</p>
+            <button id="upgrade1">Kaufen</button>
+        </div>
+
+        <div class="upgrade">
+            <h3>Praktikanten</h3>
+            <p>Generiert 0.5 Klicks/Sekunde</p>
+            <p>Kosten: <span id="upgrade2-cost">50</span> Klicks</p>
+            <button id="upgrade2">Kaufen</button>
+        </div>
+
+        <div class="upgrade">
+            <h3>Lehrer</h3>
+            <p>Generiert 2 Klicks/Sekunde</p>
+            <p>Kosten: <span id="upgrade3-cost">200</span> Klicks</p>
+            <button id="upgrade3">Kaufen</button>
+        </div>
+
+        <div class="upgrade">
+            <h3>Abteilungen</h3>
+            <p>Generiert 10 Klicks/Sekunde</p>
+            <p>Kosten: <span id="upgrade4-cost">1000</span> Klicks</p>
+            <button id="upgrade4">Kaufen</button>
+        </div>
+
+        <div class="upgrade">
+            <h3>Schulleiter</h3>
+            <p>Verdoppelt alle Einnahmen</p>
+            <p>Kosten: <span id="upgrade5-cost">5000</span> Klicks</p>
+            <button id="upgrade5">Kaufen</button>
+        </div>
+
+        <div class="upgrade">
+            <h3>Neue HTL Standorte</h3>
+            <p>Verdreifacht alle Einnahmen</p>
+            <p>Kosten: <span id="upgrade6-cost">20000</span> Klicks</p>
+            <button id="upgrade6">Kaufen</button>
+        </div>
+    </div>
+
+    <div id="achievement" class="achievement">
+        Errungenschaft freigeschaltet!
+    </div>
+</div>
+
+<script>
+    // Spielvariablen
+    let clicks = 0;
+    let clickValue = 1;
+    let passiveIncome = 0;
+    let upgrade1Count = 0;
+    let upgrade2Count = 0;
+    let upgrade3Count = 0;
+    let upgrade4Count = 0;
+    let upgrade5Count = 0;
+    let upgrade6Count = 0;
+    let multiplier = 1;
+
+    // Upgrade-Kosten
+    const upgrade1BaseCost = 10;
+    const upgrade2BaseCost = 50;
+    const upgrade3BaseCost = 200;
+    const upgrade4BaseCost = 1000;
+    const upgrade5BaseCost = 5000;
+    const upgrade6BaseCost = 20000;
+
+    // Elemente auswählen
+    const logo = document.getElementById('logo');
+    const clicksElement = document.getElementById('clicks');
+    const clickValueElement = document.getElementById('click-value');
+    const passiveIncomeElement = document.getElementById('passive-income');
+    const achievementElement = document.getElementById('achievement');
+
+    // Klick-Funktion
+    logo.addEventListener('click', () => {
+        clicks += clickValue * multiplier;
+        updateUI();
+        checkAchievements();
+    });
+
+    // Upgrade-Funktionen
+    document.getElementById('upgrade1').addEventListener('click', () => {
+        const cost = upgrade1BaseCost * Math.pow(1.5, upgrade1Count);
+        if (clicks >= cost) {
+            clicks -= cost;
+            clickValue += 1;
+            upgrade1Count++;
+            updateUI();
+        }
+    });
+
+    document.getElementById('upgrade2').addEventListener('click', () => {
+        const cost = upgrade2BaseCost * Math.pow(1.5, upgrade2Count);
+        if (clicks >= cost) {
+            clicks -= cost;
+            passiveIncome += 0.5;
+            upgrade2Count++;
+            updateUI();
+        }
+    });
+
+    document.getElementById('upgrade3').addEventListener('click', () => {
+        const cost = upgrade3BaseCost * Math.pow(1.5, upgrade3Count);
+        if (clicks >= cost) {
+            clicks -= cost;
+            passiveIncome += 2;
+            upgrade3Count++;
+            updateUI();
+        }
+    });
+
+    document.getElementById('upgrade4').addEventListener('click', () => {
+        const cost = upgrade4BaseCost * Math.pow(1.5, upgrade4Count);
+        if (clicks >= cost) {
+            clicks -= cost;
+            passiveIncome += 10;
+            upgrade4Count++;
+            updateUI();
+        }
+    });
+
+    document.getElementById('upgrade5').addEventListener('click', () => {
+        const cost = upgrade5BaseCost * Math.pow(1.5, upgrade5Count);
+        if (clicks >= cost) {
+            clicks -= cost;
+            multiplier *= 2;
+            upgrade5Count++;
+            updateUI();
+        }
+    });
+
+    document.getElementById('upgrade6').addEventListener('click', () => {
+        const cost = upgrade6BaseCost * Math.pow(1.5, upgrade6Count);
+        if (clicks >= cost) {
+            clicks -= cost;
+            multiplier *= 3;
+            upgrade6Count++;
+            updateUI();
+        }
+    });
+
+    // Passives Einkommen
+    setInterval(() => {
+        clicks += passiveIncome * multiplier;
+        updateUI();
+    }, 1000);
+
+    // UI aktualisieren
+    function updateUI() {
+        clicksElement.textContent = Math.floor(clicks);
+        clickValueElement.textContent = clickValue * multiplier;
+        passiveIncomeElement.textContent = (passiveIncome * multiplier).toFixed(1);
+
+        // Upgrade-Kosten aktualisieren
+        document.getElementById('upgrade1-cost').textContent = Math.floor(upgrade1BaseCost * Math.pow(1.5, upgrade1Count));
+        document.getElementById('upgrade2-cost').textContent = Math.floor(upgrade2BaseCost * Math.pow(1.5, upgrade2Count));
+        document.getElementById('upgrade3-cost').textContent = Math.floor(upgrade3BaseCost * Math.pow(1.5, upgrade3Count));
+        document.getElementById('upgrade4-cost').textContent = Math.floor(upgrade4BaseCost * Math.pow(1.5, upgrade4Count));
+        document.getElementById('upgrade5-cost').textContent = Math.floor(upgrade5BaseCost * Math.pow(1.5, upgrade5Count));
+        document.getElementById('upgrade6-cost').textContent = Math.floor(upgrade6BaseCost * Math.pow(1.5, upgrade6Count));
+
+        // Buttons aktivieren/deaktivieren
+        document.getElementById('upgrade1').disabled = clicks < upgrade1BaseCost * Math.pow(1.5, upgrade1Count);
+        document.getElementById('upgrade2').disabled = clicks < upgrade2BaseCost * Math.pow(1.5, upgrade2Count);
+        document.getElementById('upgrade3').disabled = clicks < upgrade3BaseCost * Math.pow(1.5, upgrade3Count);
+        document.getElementById('upgrade4').disabled = clicks < upgrade4BaseCost * Math.pow(1.5, upgrade4Count);
+        document.getElementById('upgrade5').disabled = clicks < upgrade5BaseCost * Math.pow(1.5, upgrade5Count);
+        document.getElementById('upgrade6').disabled = clicks < upgrade6BaseCost * Math.pow(1.5, upgrade6Count);
+    }
+
+    // Errungenschaften prüfen
+    function checkAchievements() {
+        if (clicks >= 1000 && !achievementShown) {
+            achievementElement.textContent = "Errungenschaft: 1000 Klicks erreicht!";
+            achievementElement.style.display = "block";
+            setTimeout(() => {
+                achievementElement.style.display = "none";
+            }, 3000);
+            achievementShown = true;
+        }
+    }
+
+    // Initialisierung
+    let achievementShown = false;
+    updateUI();
+</script>
+</body>
+</html>
